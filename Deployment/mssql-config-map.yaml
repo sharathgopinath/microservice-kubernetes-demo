@@ -1,0 +1,8 @@
+﻿apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mssql-connection-configmap
+  labels:
+    app: microservice-kube-app
+data:
+  db-connection-string: Server=mssql-service;Database=MicroServiceDemoDB;MultipleActiveResultSets=true;User Id=sa;Password=1Secure*Password1;

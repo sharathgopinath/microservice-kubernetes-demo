@@ -1,0 +1,12 @@
+﻿apiVersion: v1
+kind: Service
+metadata:
+  name: microservice-kube-app-service
+spec:
+  selector:
+    app: microservice-kube-app
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: microservice-kube-app

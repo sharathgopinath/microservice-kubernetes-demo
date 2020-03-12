@@ -1,0 +1,39 @@
+﻿apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: microservice-kube-app-deployment
+spec:
+  selector:
+    matchLabels:
+      app: microservice-kube-app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: microservice-kube-app
+    spec:
+      containers:
+        - image: "sharathgrao/microservice-kube-app:latest"
+          imagePullPolicy: Always
+          name: microservice-kube-app
+          ports:
+            - containerPort: 80
+          env:
+          - name: ConnectionStrings__DefaultConnection
+            valueFrom:
+              configMapKeyRef:
+                name: mssql-connection-configmap
+                key: db-connection-string
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservice-kube-app-service
+spec:
+  selector:
+    app: microservice-kube-app
+  type: LoadBalancer
+  ports:
+  - port: 80
+  selector:
+    app: microservice-kube-app

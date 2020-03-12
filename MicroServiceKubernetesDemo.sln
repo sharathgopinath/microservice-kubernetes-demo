@@ -3,9 +3,40 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Src", "Src", "{EF1642D5-589B-4650-B768-E8C137B091BF}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MicroService", "Src\MicroService\MicroService.csproj", "{293E63D9-723E-4F05-B079-831DE03D29A9}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{C0910E90-7FCA-4108-825E-840908E3D52C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", "{3560DF7A-960F-4AAF-9FB6-60E8A2FDCFFD}"
+	ProjectSection(SolutionItems) = preProject
+		Deployment\app-deployment.yaml = Deployment\app-deployment.yaml
+		Deployment\mssql-config-map.yaml = Deployment\mssql-config-map.yaml
+		Deployment\mssql-deployment.yaml = Deployment\mssql-deployment.yaml
+		Deployment\mssql-pv.yaml = Deployment\mssql-pv.yaml
+	EndProjectSection
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{293E63D9-723E-4F05-B079-831DE03D29A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{293E63D9-723E-4F05-B079-831DE03D29A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{293E63D9-723E-4F05-B079-831DE03D29A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{293E63D9-723E-4F05-B079-831DE03D29A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0910E90-7FCA-4108-825E-840908E3D52C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0910E90-7FCA-4108-825E-840908E3D52C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0910E90-7FCA-4108-825E-840908E3D52C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0910E90-7FCA-4108-825E-840908E3D52C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{293E63D9-723E-4F05-B079-831DE03D29A9} = {EF1642D5-589B-4650-B768-E8C137B091BF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D48403AC-8AA3-4608-9D11-02366DAA0625}
