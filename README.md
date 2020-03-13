@@ -69,7 +69,7 @@ You can check if the mssql-service is running withe below command, alternatively
 ```
 > kubectl get services
 ```
-<img src="images/get-svc-mssql" width="600">
+<img src="images/get-svc-mssql.png" width="600">
 
 You can also login to the mssql-service from your SQL management studio, use the password defined in the config map. Username will be - localhost,1433
 
@@ -119,7 +119,7 @@ Do check the Kubernetes web dashboard if the deployment is successful.
 This time, we will push our API app container (microservice-kube-app) to the AWS ECR (Eastic Container Registry).
 - Goto https://console.aws.amazon.com/ecr/home and Create a repository with the name "microservice-kube-app" (select all default settings).
 - Open the repository and click on "View push commands", a dialog opens, select the Windows tab if you are on windows
-<img src="aws-ecr-push-commands.png" width="600">
+<img src="images/aws-ecr-push-commands.png" width="600">
 - Follow the steps mentioned in that dialog except for step 2 (build your docker image). We use our docker-compose to build our docker image, so Run the below command instead of step 2 in the project's root directory
 ```
 > docker-compose build
@@ -160,4 +160,4 @@ You can look at the logs for a pod (app or mssql service) by
 ```
 > kubectl logs -f POD_NAME
 ```
-<img src="kube-pod-log" width="600">
+<img src="kube-pod-log.png" width="600">
