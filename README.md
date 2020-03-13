@@ -5,7 +5,9 @@ A simple Asp.Net Core API project with EF Core and Sql server, running on Kubern
 - Ensure you have Docker desktop installed (https://www.docker.com/products/docker-desktop)
 - Switch to **Linux** containers from the Docker taskbar icon (If you see the option "Switch to Windows containers", that means it's already set to Linux containers so skip this step)
 - Enable Kubernetes in Docker desktop
-![](images/docker-desktop-kube.png)
+
+<img src="images/docker-desktop-kube.png" width="600">
+
 - Ensure your kubernetes context is set to docker desktop (to run it locally). Click on the Docker taskbar icon, hover over "kubernetes" menu item and select "Docker desktop". You will see the AWS context once that is setup, more on that later.
 - If everything's fine, run the kubectl version command and it should display the kubernetes version information
 ```
@@ -16,4 +18,5 @@ A simple Asp.Net Core API project with EF Core and Sql server, running on Kubern
 ```
 > kubectl -n kubernetes-dashboard describe secret $(kubectl -n kubernetes-dashboard get secret | sls admin-user | ForEach-Object { $_ -Split '\s+' } | Select -First 1)
 ```
-![](images/kube-dashboard-login.png)
+
+<img src="images/kube-dashboard-login.png" width="600">
