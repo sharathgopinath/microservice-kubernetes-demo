@@ -40,27 +40,28 @@ It takes about 10 mins to create all those resources, once done you will see a "
 ```
 
 If you run into any problems until this point, please do refer the official documentation provided above (https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html), just ensure you run the command provided in this readme for creating the cluster to be able to run the project and to keep the costs down :wink:
+
 4. Setup the Kubernetes web dashboard (this step is optional, but recommended). Follow the steps provided here - https://docs.aws.amazon.com/eks/latest/userguide/dashboard-tutorial.html
+
 5. If you went ahead with the setup of Kuberentes web dashboard and are using Powershell, use the below command to get the admin bearer token to login to the dashboard - 
 ```
 > kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | sls eks-admin-token | ForEach-Object { $_ -Split '\s+' } | Select -First 1)
 ```
-
 
 ## Deployment
 Deployment to Kubernetes is defined in .yaml files. There are a couple of yaml files in the Deployment folder of this project which will be used to deploy the application. Each container has to be deployed and exposed as a service, in this case we have two containers
 - Container - 1: ASP.NET Core API application
 - Container - 2: SQL Server database
 
-While deploying a database, it is best practice to mount it to a persistent volume. A persistent volume, as the name suggests is to persist the data. If we do not specify volume in the mssql deployment yaml file, the database will use the node's local file storage to store the data which will be lost in case the node hosting the database goes down or crashes for some reason. In our example, we will use the persistent volume when deploying to AWS, but for deploying locally, we will go with a simple approach and not specify any persistent volume.
+While deploying a database, it is best practice to mount it to a persistent volume. A persistent volume, as the name suggests is to persist the data. If we do not specify volume in the mssql deployment yaml file, the database will use the node's local file storage to store the data which will be lost in case the node hosting the database crashes or if the db container is moved to another node. In our example, we will use the persistent volume when deploying to AWS, but for deploying locally, we will go with a simple approach and not specify any persistent volume.
 
 ### Deploy to local Kubernetes environment
-All deployment scripts are in the Deployment folder.
-- Run the below command to apply the Config maps, we define our database connection string in the config map. I have defined the credentials as well here, but there are better approaches to store it . (refer https://kubernetes.io/docs/concepts/configuration/secret/)
+***All deployment scripts are in the Deployment folder.***
+1. Run the below command to apply the Config maps, we define our database connection string in the config map. I have defined the credentials as well here, but there are better approaches to store it . (refer https://kubernetes.io/docs/concepts/configuration/secret/)
 ```
 > kubectl apply -f mssql-config-map.yaml
 ```
-1. Run the below command to deploy mssql. Here we use the mcr.microsoft.com/mssql/server:2019-latest docker image for sql server
+2. Run the below command to deploy mssql. Here we use the mcr.microsoft.com/mssql/server:2019-latest docker image for sql server
 ```
 > kubectl apply -f mssql-deployment-local.yaml
 ```
@@ -72,7 +73,7 @@ You can check if the mssql-service is running withe below command, alternatively
 
 You can also login to the mssql-service from your SQL management studio, use the password defined in the config map. Username will be - localhost,1433
 
-2. Deploy the API container
+3. Deploy the API container
 To do this, first you need to create the container and push it to Docker Hub. Create a Docker Hub account if you do not already have an account (https://hub.docker.com/). In our local Kubernetes deployment, we will use our API app container from Docker registry. For the AWS deployment, we will push the container to the AWS ECR (Elastic Container Registry).
 
 - Build the docker container using Docker compose. Navigate to the project's root directory which contains docker-compose.yml (The steps to build is similar to the ones demonstrated at - https://github.com/sharathgopinath/microservice-demo)
@@ -85,7 +86,7 @@ To do this, first you need to create the container and push it to Docker Hub. Cr
 Once the microservice-kube-app container is pushed successfully, you will have to use that container name (<YOUR_DOCKERHUB_USERNAME/microservice-kube-app) in the app-deployment.yaml file. Replace the container name in the yaml file with your newly pushed container name
 ```
 containers:
-        - image: "<YOUR_DOCKERHUB_USERNAME/microservice-kube-app"
+        - image: "<YOUR_DOCKERHUB_USERNAME>/microservice-kube-app"
 ```
 - Run the below command to deploy to Kubernetes local (navigate to Deployment folder)
 ```
@@ -94,5 +95,69 @@ containers:
 You can check if the app service is running by the kubectl get services command
 <img src="images/get-svc-app.png" width="600">
 
-3. Your application should be up and running! It should be available on http://localhost/api/Product
+3. Your application should be up and running! :crossed_fingers: It should be available on http://localhost/api/Product 
 
+### Deploy to AWS Elastic Kubernetes Service
+***All deployment scripts are in the Deployment folder.***
+***Ensure you have selected the AWS test cluster as the Kubernetes context in your Docker desktop app (click on the docker taskbar icon, hover over Kubernetes, select administrator@test.<YOUR_REGION_NAME>)***
+1. Create a storage class and persistent volume. As explained above, the persistent volume is essential for a database to persist data regardless of where Kubernetes decides to host the db container. 
+- We will be using EBS (Elastic Block Store) as the storage class for our persistent volume, this requires some drivers to be installed to allow Kubernetes on EKS to manage EBS. Please follow the steps provided here to set it all up - https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html
+- Run the below command to provision a persistent volume to allow our mssql container to use it (later steps)
+```
+> kubectl apply -f mssql-pv.aws.yaml
+```
+2. Deploy mssql container. Run the below command - 
+```
+> kubectl apply -f mssql-deployment-aws.yaml
+```
+Do check the Kubernetes web dashboard if the deployment is successful. 
+3. Run the below command to apply the Config maps, we define our database connection string in the config map. I have defined the credentials as well here, but there are better approaches to store it . (refer https://kubernetes.io/docs/concepts/configuration/secret/)
+```
+> kubectl apply -f mssql-config-map.yaml
+```
+4. Deploy the API container
+This time, we will push our API app container (microservice-kube-app) to the AWS ECR (Eastic Container Registry).
+- Goto https://console.aws.amazon.com/ecr/home and Create a repository with the name "microservice-kube-app" (select all default settings).
+- Open the repository and click on "View push commands", a dialog opens, select the Windows tab if you are on windows
+<img src="aws-ecr-push-commands.png" width="600">
+- Follow the steps mentioned in that dialog except for step 2 (build your docker image). We use our docker-compose to build our docker image, so Run the below command instead of step 2 in the project's root directory
+```
+> docker-compose build
+```
+- Follow the remaining steps mentioned in that dialog, once done, ensure you can see your image inside the AWS console page for ECR
+
+Once the microservice-kube-app container is pushed successfully to AWS ECR, you will have to use that container name (****.dkr.ecr.ap-southeast-2.amazonaws.com/microservice-kube-app) in the app-deployment.yaml file. Replace the container name in the yaml file with your newly pushed container name
+```
+containers:
+        - image: "****.dkr.ecr.ap-southeast-2.amazonaws.com/microservice-kube-app"
+```
+
+- Navigate to Deployment folder and run the below command to deploy your app container
+```
+> kubectl apply -f app-deployment.yaml
+```
+You can check if the app service is running by the kubectl get services command
+<img src="images/get-svc-app-aws.png" width="600">
+4. It may take couple of minutes for the app to start and respond to your requests, wait for a few minues and your application should be up and running! :crossed_fingers: It should be available on http://********.ap-southeast-2.elb.amazonaws.com/api/Product (base url is available from kubectl get svc command)
+
+### Tear down all resources
+1. Run the below commands to de-provision your resources from within Kubernetes
+```
+> kubectl delete -f mssql-pv.aws.yaml
+> kubectl delete -f mssql-deployment-aws.yaml
+> kubectl delete -f app-deployment.yaml
+```
+2. You still need to delete your clusters and node groups (all the VPC, EC2 etc.). For this goto http://console.aws.amazon.com/cloudformation and delete your node groups stack first, then once it is successful, delete the cluster stack (1. eksctl-test-nodegroup-standard-workers, 2. eksctl-test-cluster)
+3. The above step takes about 10 mins, and then all your resouces should be cleaned up. If you want to run the project again, remember to re-run the prerequisites steps for AWS EKS staring from Step-3 (create cluster)
+
+### Troubleshooting
+You can look at the logs for a pod (app or mssql service) by 
+1. Running the below command
+```
+> kubectl get pods
+```
+2. Copy the pod name for your deployment and run the below command - 
+```
+> kubectl logs -f POD_NAME
+```
+<img src="kube-pod-log" width="600">
