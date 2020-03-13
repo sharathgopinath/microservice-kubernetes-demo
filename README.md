@@ -10,6 +10,7 @@ This demo uses the same application which was used to demonstrate an ASP.NET app
 - Switch to **Linux** containers from the Docker taskbar icon (If you see the option "Switch to Windows containers", that means it's already set to Linux containers so skip this step)
 - Enable Kubernetes in Docker desktop
 <img src="images/docker-desktop-kube.png" width="600">
+
 - Ensure your kubernetes context is set to docker desktop (to run it locally). Click on the Docker taskbar icon, hover over "kubernetes" menu item and select "Docker desktop". You will see the AWS context once that is setup, more on that later.
 - If everything's fine, run the kubectl version command and it should display the kubernetes version information
 ```
@@ -30,7 +31,8 @@ EKS is a fully managed Kubernetes service provided by AWS. At the time of writin
 - Install eksctl (command line utility for EKS)
 
 2. Create a key-pair using Amazon EC2 (if you already have one which you would like to use, you can skip this step). Goto https://console.aws.amazon.com/ec2/, in the navigation pane choose key pairs, then create key pair. Select ppk if you are on a Windows system and use PuTTY for ssh. Note down your key pair name (minus the extension).
-3. Create a cluster. Run the below command which creates a new cluster called  "test", in the ap-southeast-2 region, EC2 instance type is t3.medium and max nodes is 2.  **Once you create a cluster using the below command, AWS will provision a number of resources (VPC subnets, NAT, IAM roles, security groups, EC2 instances etc). Some of them are not free, especially the EC2 instances, so it's a good idea to tear down all the resources once you're done with it, more on that later.**
+3. Create a cluster. Run the below command which creates a new cluster called  "test", in the ap-southeast-2 region, EC2 instance type is t3.medium and max nodes is 2.
+**Once you create a cluster using the below command, AWS will provision a number of resources (VPC subnets, NAT, IAM roles, security groups, EC2 instances etc). Some of them are not free, especially the EC2 instances, so it's a good idea to tear down all the resources once you're done with it, more on that later.**
 ```
 > eksctl create cluster --name test --region ap-southeast-2 --nodegroup-name standard-workers --node-type t3.medium --nodes 2 --nodes-min 1 --nodes-max 2 --ssh-access --ssh-public-key ec2-keypair --managed
 ```
