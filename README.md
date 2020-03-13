@@ -41,7 +41,7 @@ You can check if the mssql-service is running withe below command, alternatively
 ```
 > kubectl get services
 ```
-<img src="images/get-svc-mssql" width="600">
+<img src="images/get-svc-mssql.png" width="600">
 
 You can also login to the mssql-service from your SQL management studio, use the password defined in the config map. Username will be - localhost,1433
 
