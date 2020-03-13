@@ -13,12 +13,6 @@ spec:
       containers:
       - name: db-server
         image: mcr.microsoft.com/mssql/server:2019-latest
-        #resources:
-        #  limits:
-        #    cpu: "1"
-        #    memory: "1Gi"
-        #  requests:
-        #    cpu: "0.5"
         ports:
         - containerPort: 1433
         env:
@@ -26,13 +20,6 @@ spec:
           value: "Y"
         - name: SA_PASSWORD
           value: "1Secure*Password1"
-        #volumeMounts:
-        #- name: mssql
-        #  mountPath: /var/opt/mssql
-      #volumes:
-      #- name: mssql
-      #  persistentVolumeClaim:
-      #    claimName: mssql-pv-claim
 ---
 apiVersion: v1
 kind: Service

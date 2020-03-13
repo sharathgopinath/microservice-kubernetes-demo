@@ -13,8 +13,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Deployment", "Deployment", 
 	ProjectSection(SolutionItems) = preProject
 		Deployment\app-deployment.yaml = Deployment\app-deployment.yaml
 		Deployment\mssql-config-map.yaml = Deployment\mssql-config-map.yaml
-		Deployment\mssql-deployment.yaml = Deployment\mssql-deployment.yaml
-		Deployment\mssql-pv.yaml = Deployment\mssql-pv.yaml
+		Deployment\mssql-deployment-aws.yaml = Deployment\mssql-deployment-aws.yaml
+		Deployment\mssql-deployment-local.yaml = Deployment\mssql-deployment-local.yaml
+		Deployment\mssql-pv-aws.yaml = Deployment\mssql-pv-aws.yaml
 	EndProjectSection
 EndProject
 Global

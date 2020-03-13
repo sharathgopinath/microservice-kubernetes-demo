@@ -13,7 +13,7 @@ spec:
         app: microservice-kube-app
     spec:
       containers:
-        - image: "sharathgrao/microservice-kube-app:latest"
+        - image: "253347999681.dkr.ecr.ap-southeast-2.amazonaws.com/microservice-kube-app"
           imagePullPolicy: Always
           name: microservice-kube-app
           ports:
