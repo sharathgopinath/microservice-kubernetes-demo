@@ -121,6 +121,7 @@ This time, we will push our API app container (microservice-kube-app) to the AWS
 - Open the repository and click on "View push commands", a dialog opens, select the Windows tab if you are on windows
 <img src="images/aws-ecr-push-commands.png" width="600">
 - Follow the steps mentioned in that dialog except for step 2 (build your docker image). We use our docker-compose to build our docker image, so Run the below command instead of step 2 in the project's root directory
+
 ```
 > docker-compose build
 ```
@@ -160,4 +161,4 @@ You can look at the logs for a pod (app or mssql service) by
 ```
 > kubectl logs -f POD_NAME
 ```
-<img src="kube-pod-log.png" width="600">
+<img src="images/kube-pod-log.png" width="600">
