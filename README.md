@@ -1,7 +1,11 @@
 # Microservice Kubernetes Demo
-A simple Asp.Net Core API project with EF Core and Sql server, running on Kubernetes (AWS EKS / local Docker desktop environment)
+This project demonstrates the deployment of a two container app on Kubernetes (on AWS EKS / local Docker desktop environment)-
+1. Container 1 - is a basic Product API endpoint with CRUD operations
+2. Container 2 - mssql server container (image - mcr.microsoft.com/mssql/server:2019-latest)
 
-This demo uses the same application which was used to demonstrate an ASP.NET application running on Docker container locally. Please refer it to quickly spin up an app in your local Docker environment without Kubernetes - https://github.com/sharathgopinath/microservice-demo
+When running for the first time, the application runs EF code first migrations to setup the required db schema.
+
+This demo uses the same application which was used to demonstrate an ASP.NET application with EF Core running on Docker container locally. Please refer it to quickly spin up an app in your local Docker environment without Kubernetes - https://github.com/sharathgopinath/microservice-demo
 
 *Kubernetes basics: https://kubernetes.io/docs/tutorials/kubernetes-basics/*
 
@@ -32,9 +36,10 @@ EKS is a fully managed Kubernetes service provided by AWS. At the time of writin
 
 2. Create a key-pair using Amazon EC2 (if you already have one which you would like to use, you can skip this step). Goto https://console.aws.amazon.com/ec2/, in the navigation pane choose key pairs, then create key pair. Select ppk if you are on a Windows system and use PuTTY for ssh. Note down your key pair name (minus the extension).
 3. Create a cluster. Run the below command which creates a new cluster called  "test", in the ap-southeast-2 region, EC2 instance type is t3.medium and max nodes is 2.
+
 **Once you create a cluster using the below command, AWS will provision a number of resources (VPC subnets, NAT, IAM roles, security groups, EC2 instances etc). Some of them are not free, especially the EC2 instances, so it's a good idea to tear down all the resources once you're done with it, more on that later.**
 ```
-> eksctl create cluster --name test --region ap-southeast-2 --nodegroup-name standard-workers --node-type t3.medium --nodes 2 --nodes-min 1 --nodes-max 2 --ssh-access --ssh-public-key ec2-keypair --managed
+> eksctl create cluster --name test --region ap-southeast-2 --nodegroup-name standard-workers --node-type t3.medium --nodes 2 --nodes-min 1 --nodes-max 2 --ssh-access --ssh-public-key <YOUR_KEYPAIR_MINUS_THE_EXTENSION> --managed
 ```
 It takes about 10 mins to create all those resources, once done you will see a "successfully created message". You can also see the status on the AWS console cloud formation page. It essentially creates two CF stacks, one for the cluster and one for the nodegroup (http://console.aws.amazon.com/cloudformation). Once done, Run the below command and you should the kubernetes service running - 
 ```
@@ -59,7 +64,7 @@ While deploying a database, it is best practice to mount it to a persistent volu
 
 ### Deploy to local Kubernetes environment
 ***All deployment scripts are in the Deployment folder.***
-1. Run the below command to apply the Config maps, we define our database connection string in the config map. I have defined the credentials as well here, but there are better approaches to store it . (refer https://kubernetes.io/docs/concepts/configuration/secret/)
+1. Run the below command to apply the Config maps, we define our database connection string in the config map. I have defined the credentials as well here, but there are better approaches to store it . (refer https://kubernetes.io/docs/concepts/configuration/secret/ to know more about storing credentials)
 ```
 > kubectl apply -f mssql-config-map.yaml
 ```
@@ -67,7 +72,7 @@ While deploying a database, it is best practice to mount it to a persistent volu
 ```
 > kubectl apply -f mssql-deployment-local.yaml
 ```
-You can check if the mssql-service is running withe below command, alternatively you can check the status of all services on the web dashboard
+You can check if the mssql-service is running with the below command, alternatively you can check the status of all services on the web dashboard
 ```
 > kubectl get services
 ```
@@ -75,8 +80,7 @@ You can check if the mssql-service is running withe below command, alternatively
 
 You can also login to the mssql-service from your SQL management studio, use the password defined in the config map. Username will be - localhost,1433
 
-3. Deploy the API container
-To do this, first you need to create the container and push it to Docker Hub. Create a Docker Hub account if you do not already have an account (https://hub.docker.com/). In our local Kubernetes deployment, we will use our API app container from Docker registry. For the AWS deployment, we will push the container to the AWS ECR (Elastic Container Registry).
+3. Deploy the API container. To do this, first you need to create the container and push it to Docker Hub. Create a Docker Hub account if you do not already have one (https://hub.docker.com/). In our local Kubernetes deployment, we will use our API app container from Docker registry. For the AWS deployment, we will push the container to the AWS ECR (Elastic Container Registry).
 
 - Build the docker container using Docker compose. Navigate to the project's root directory which contains docker-compose.yml (The steps to build is similar to the ones demonstrated at - https://github.com/sharathgopinath/microservice-demo)
 ```
@@ -102,7 +106,7 @@ You can check if the app service is running by the kubectl get services command
 ### Deploy to AWS Elastic Kubernetes Service
 ***All deployment scripts are in the Deployment folder.***
 ***Ensure you have selected the AWS test cluster as the Kubernetes context in your Docker desktop app (click on the docker taskbar icon, hover over Kubernetes, select administrator@test.<YOUR_REGION_NAME>)***
-1. Create a storage class and persistent volume. As explained above, the persistent volume is essential for a database to persist data regardless of where Kubernetes decides to host the db container. 
+1. Create a storage class and persistent volume. As explained above, the persistent volume is essential for a database to persist data regardless of which node Kubernetes decides to host the db container in. 
 - We will be using EBS (Elastic Block Store) as the storage class for our persistent volume, this requires some drivers to be installed to allow Kubernetes on EKS to manage EBS. Please follow the steps provided here to set it all up - https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html
 - Run the below command to provision a persistent volume to allow our mssql container to use it (later steps)
 ```
@@ -113,16 +117,16 @@ You can check if the app service is running by the kubectl get services command
 > kubectl apply -f mssql-deployment-aws.yaml
 ```
 Do check the Kubernetes web dashboard if the deployment is successful. 
+
 3. Run the below command to apply the Config maps, we define our database connection string in the config map. I have defined the credentials as well here, but there are better approaches to store it . (refer https://kubernetes.io/docs/concepts/configuration/secret/)
 ```
 > kubectl apply -f mssql-config-map.yaml
 ```
-4. Deploy the API container
-This time, we will push our API app container (microservice-kube-app) to the AWS ECR (Eastic Container Registry).
+4. Deploy the API container. This time, we will push our API app container (microservice-kube-app) to the AWS ECR (Eastic Container Registry).
 - Goto https://console.aws.amazon.com/ecr/home and Create a repository with the name "microservice-kube-app" (select all default settings).
 - Open the repository and click on "View push commands", a dialog opens, select the Windows tab if you are on windows
 <img src="images/aws-ecr-push-commands.png" width="600">
-- Follow the steps mentioned in that dialog except for step 2 (build your docker image). We use our docker-compose to build our docker image, so Run the below command instead of step 2 in the project's root directory
+- Follow the steps mentioned in that dialog except for step 2 (build your docker image). We use our docker-compose to build our docker image, so run the below command instead of step 2 in the project's root directory
 
 ```
 > docker-compose build
@@ -141,9 +145,10 @@ containers:
 ```
 You can check if the app service is running by the kubectl get services command
 <img src="images/get-svc-app-aws.png" width="600">
-4. It may take couple of minutes for the app to start and respond to your requests, wait for a few minues and your application should be up and running! :crossed_fingers: It should be available on http://********.ap-southeast-2.elb.amazonaws.com/api/Product (base url is available from kubectl get svc command)
 
-### Tear down all resources
+4. It may take couple of minutes for the app to start and respond to your requests, wait for a few minutes and your application should be up and running! :crossed_fingers: It should be available on http://********.ap-southeast-2.elb.amazonaws.com/api/Product (base url is available from kubectl get svc command)
+
+### Tear down all resources - ***Important***
 1. Run the below commands to de-provision your resources from within Kubernetes
 ```
 > kubectl delete -f mssql-pv.aws.yaml
@@ -151,7 +156,8 @@ You can check if the app service is running by the kubectl get services command
 > kubectl delete -f app-deployment.yaml
 ```
 2. You still need to delete your clusters and node groups (all the VPC, EC2 etc.). For this goto http://console.aws.amazon.com/cloudformation and delete your node groups stack first, then once it is successful, delete the cluster stack (1. eksctl-test-nodegroup-standard-workers, 2. eksctl-test-cluster)
-3. The above step takes about 10 mins, and then all your resouces should be cleaned up. If you want to run the project again, remember to re-run the prerequisites steps for AWS EKS staring from Step-3 (create cluster)
+3. The above step takes about 10 mins, and then all your resources should be cleaned up. 
+***If you want to run this project again later, remember to re-run the prerequisite steps for AWS EKS staring from Step-3 (create cluster)***
 
 ### Troubleshooting
 You can look at the logs for a pod (app or mssql service) by 
