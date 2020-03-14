@@ -41,7 +41,7 @@ EKS is a fully managed Kubernetes service provided by AWS. At the time of writin
 ```
 > eksctl create cluster --name test --region ap-southeast-2 --nodegroup-name standard-workers --node-type t3.medium --nodes 2 --nodes-min 1 --nodes-max 2 --ssh-access --ssh-public-key <YOUR_KEYPAIR_MINUS_THE_EXTENSION> --managed
 ```
-It takes about 10 mins to create all those resources, once done you will see a "successfully created message". You can also see the status on the AWS console cloud formation page. It essentially creates two CF stacks, one for the cluster and one for the nodegroup (http://console.aws.amazon.com/cloudformation). Once done, Run the below command and you should the kubernetes service running - 
+It takes about 10 mins to create all those resources, once done you will see a "successfully created message". You can also see the status on the AWS console cloud formation page. It essentially creates two CF stacks, one for the cluster and one for the nodegroup (http://console.aws.amazon.com/cloudformation). Once done, Run the below command and you should see the kubernetes service running - 
 ```
 > kubectl get svc
 ```
@@ -101,14 +101,14 @@ containers:
 You can check if the app service is running by the kubectl get services command
 <img src="images/get-svc-app.png" width="600">
 
-3. Your application should be up and running! :crossed_fingers: It should be available on http://localhost/api/Product 
+4. Your application should be up and running! :crossed_fingers: It should be available on http://localhost/api/Product 
 
 ### Deploy to AWS Elastic Kubernetes Service
 ***All deployment scripts are in the Deployment folder.***
 ***Ensure you have selected the AWS test cluster as the Kubernetes context in your Docker desktop app (click on the docker taskbar icon, hover over Kubernetes, select administrator@test.<YOUR_REGION_NAME>)***
 1. Create a storage class and persistent volume. As explained above, the persistent volume is essential for a database to persist data regardless of which node Kubernetes decides to host the db container in. 
 - We will be using EBS (Elastic Block Store) as the storage class for our persistent volume, this requires some drivers to be installed to allow Kubernetes on EKS to manage EBS. Please follow the steps provided here to set it all up - https://docs.aws.amazon.com/eks/latest/userguide/ebs-csi.html
-- Run the below command to provision a persistent volume to allow our mssql container to use it (later steps)
+- Run the below command to provision a persistent volume to allow our mssql container to use it
 ```
 > kubectl apply -f mssql-pv.aws.yaml
 ```
@@ -122,7 +122,7 @@ Do check the Kubernetes web dashboard if the deployment is successful.
 ```
 > kubectl apply -f mssql-config-map.yaml
 ```
-4. Deploy the API container. This time, we will push our API app container (microservice-kube-app) to the AWS ECR (Eastic Container Registry).
+4. Deploy the API container. This time, we will push our API app container (microservice-kube-app) to the AWS ECR (Elastic Container Registry).
 - Goto https://console.aws.amazon.com/ecr/home and Create a repository with the name "microservice-kube-app" (select all default settings).
 - Open the repository and click on "View push commands", a dialog opens, select the Windows tab if you are on windows
 <img src="images/aws-ecr-push-commands.png" width="600">
@@ -157,7 +157,7 @@ You can check if the app service is running by the kubectl get services command
 ```
 2. You still need to delete your clusters and node groups (all the VPC, EC2 etc.). For this goto http://console.aws.amazon.com/cloudformation and delete your node groups stack first, then once it is successful, delete the cluster stack (1. eksctl-test-nodegroup-standard-workers, 2. eksctl-test-cluster)
 3. The above step takes about 10 mins, and then all your resources should be cleaned up. 
-***If you want to run this project again later, remember to re-run the prerequisite steps for AWS EKS staring from Step-3 (create cluster)***
+***If you want to run this project again later, remember to re-run the prerequisite steps for AWS EKS starting from Step-3 (create cluster)***
 
 ### Troubleshooting
 You can look at the logs for a pod (app or mssql service) by 
